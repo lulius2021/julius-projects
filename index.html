@@ -1035,13 +1035,51 @@
   const DEFAULT_PASSWORD = 'julius2024';
   const PROJECT_COLORS = ['#ff1744','#ff5252','#ff867f','#e53935','#c62828','#ff6e40','#ff3d00','#dd2c00'];
 
+  const API_BASE = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? '' : location.origin;
+
   function getData() {
     const d = localStorage.getItem('jp_data');
     if (d) return JSON.parse(d);
     return { projects: [...DEFAULT_PROJECTS], entries: [], weeklyGoal: DEFAULT_GOAL, password: DEFAULT_PASSWORD };
   }
 
-  function saveData(data) { localStorage.setItem('jp_data', JSON.stringify(data)); }
+  function saveData(d) {
+    localStorage.setItem('jp_data', JSON.stringify(d));
+    // Sync to server
+    syncSave(d);
+  }
+
+  async function syncSave(d) {
+    try {
+      await fetch(API_BASE + '/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: d.password, data: d })
+      });
+    } catch(e) { /* offline, ignore */ }
+  }
+
+  async function syncLoad(password) {
+    try {
+      const res = await fetch(API_BASE + '/api/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const json = await res.json();
+      if (json.ok && json.data) {
+        // Merge: server wins if it has more entries
+        const local = getData();
+        if (json.data.entries && json.data.entries.length >= (local.entries || []).length) {
+          json.data.password = password; // keep current password
+          localStorage.setItem('jp_data', JSON.stringify(json.data));
+          return json.data;
+        }
+      }
+    } catch(e) { /* offline */ }
+    return null;
+  }
 
   let data = getData();
   let timerRunning = false;
@@ -1052,10 +1090,17 @@
   let lastFlipValues = { h0:'0', h1:'0', m0:'0', m1:'0', s0:'0', s1:'0' };
 
   // ---- AUTH ----
-  function tryLogin() {
+  async function tryLogin() {
     const pw = document.getElementById('password-input').value;
+    // Try loading from server first
+    const serverData = await syncLoad(pw);
+    if (serverData) {
+      data = serverData;
+      data.password = pw;
+    }
     if (pw === data.password) {
       sessionStorage.setItem('jp_auth', '1');
+      sessionStorage.setItem('jp_pw', pw);
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       init();
@@ -1479,7 +1524,14 @@
   if (sessionStorage.getItem('jp_auth') === '1') {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    init();
+    // Re-sync from server on reload
+    const pw = sessionStorage.getItem('jp_pw');
+    if (pw) {
+      syncLoad(pw).then(serverData => {
+        if (serverData) { data = serverData; data.password = pw; renderAll(); populateProjectSelects(); }
+        init();
+      });
+    } else { init(); }
   }
 </script>
 </body>
