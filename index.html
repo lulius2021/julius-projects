@@ -683,7 +683,12 @@
   <!-- Timer -->
   <div class="timer-section">
     <div class="timer-controls">
-      <select class="timer-project-select" id="timer-project"></select>
+      <div id="timer-projects-list" style="display:flex;flex-direction:column;gap:0.5rem;align-items:center">
+        <div class="timer-project-row" style="display:flex;align-items:center;gap:0.5rem">
+          <select class="timer-project-select" data-timer-project></select>
+        </div>
+      </div>
+      <button class="btn btn-sm" onclick="addTimerProject()" title="Projekt hinzufügen" style="font-size:1.1rem;padding:5px 10px;margin-left:0.5rem">+</button>
       <button class="timer-btn" id="timer-toggle" onclick="toggleTimer()">▶</button>
     </div>
     <div class="timer-display" id="timer-display">00:00:00</div>
@@ -847,7 +852,15 @@
     if (saved) {
       const t = JSON.parse(saved);
       timerStart = t.start;
-      document.getElementById('timer-project').value = t.project;
+      // Restore project selects
+      const projects = t.projects || [t.project];
+      const firstSel = document.querySelector('[data-timer-project]');
+      if (firstSel && projects[0]) firstSel.value = projects[0];
+      for (let i = 1; i < projects.length; i++) {
+        addTimerProject();
+        const sels = document.querySelectorAll('[data-timer-project]');
+        sels[sels.length - 1].value = projects[i];
+      }
       startTimerUI();
     }
   }
@@ -859,8 +872,35 @@
   // ---- PROJECTS ----
   function populateProjectSelects() {
     const opts = data.projects.map(p => `<option value="${p}">${p}</option>`).join('');
-    document.getElementById('timer-project').innerHTML = opts;
+    document.querySelectorAll('[data-timer-project]').forEach(s => {
+      const cur = s.value;
+      s.innerHTML = opts;
+      if (cur) s.value = cur;
+    });
     document.getElementById('manual-project').innerHTML = opts;
+  }
+
+  function addTimerProject() {
+    const list = document.getElementById('timer-projects-list');
+    const row = document.createElement('div');
+    row.className = 'timer-project-row';
+    row.style.cssText = 'display:flex;align-items:center;gap:0.5rem';
+    const sel = document.createElement('select');
+    sel.className = 'timer-project-select';
+    sel.setAttribute('data-timer-project', '');
+    sel.innerHTML = data.projects.map(p => `<option value="${p}">${p}</option>`).join('');
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'btn btn-sm btn-danger';
+    rmBtn.textContent = '✕';
+    rmBtn.style.cssText = 'padding:4px 8px;font-size:0.8rem';
+    rmBtn.onclick = () => row.remove();
+    row.appendChild(sel);
+    row.appendChild(rmBtn);
+    list.appendChild(row);
+  }
+
+  function getSelectedTimerProjects() {
+    return [...document.querySelectorAll('[data-timer-project]')].map(s => s.value);
   }
 
   function addProject() {
@@ -891,7 +931,7 @@
     timerStart = Date.now();
     localStorage.setItem('jp_timer', JSON.stringify({
       start: timerStart,
-      project: document.getElementById('timer-project').value
+      projects: getSelectedTimerProjects()
     }));
     startTimerUI();
   }
@@ -915,17 +955,21 @@
 
   function stopTimer() {
     const elapsed = (Date.now() - timerStart) / 3600000;
-    const hours = Math.round(elapsed * 4) / 4; // Round to 0.25
-    const project = localStorage.getItem('jp_timer') ?
-      JSON.parse(localStorage.getItem('jp_timer')).project :
-      document.getElementById('timer-project').value;
+    const totalHours = Math.round(elapsed * 4) / 4; // Round to 0.25
+    const saved = localStorage.getItem('jp_timer') ? JSON.parse(localStorage.getItem('jp_timer')) : null;
+    const projects = saved && saved.projects ? saved.projects : getSelectedTimerProjects();
+    // Deduplicate
+    const unique = [...new Set(projects)];
+    const perProject = Math.round((totalHours / unique.length) * 4) / 4;
 
-    if (hours >= 0.05) {
-      data.entries.push({
-        id: Date.now(),
-        date: todayStr(),
-        project,
-        hours: Math.max(0.25, hours)
+    if (totalHours >= 0.05 && unique.length > 0) {
+      unique.forEach((project, i) => {
+        data.entries.push({
+          id: Date.now() + i,
+          date: todayStr(),
+          project,
+          hours: Math.max(0.25, perProject)
+        });
       });
       saveData(data);
     }
