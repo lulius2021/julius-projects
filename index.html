@@ -348,93 +348,115 @@
       50% { box-shadow: 0 0 30px rgba(255,23,68,0.7), 0 0 80px rgba(255,23,68,0.35); }
     }
 
-    /* Flip Clock Container */
-    .flip-clock {
+    /* Digital Clock */
+    .digital-clock {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 4px;
       margin: 1.5rem 0;
-    }
-
-    .flip-group {
-      display: flex;
-      gap: 5px;
-    }
-
-    .flip-card {
       position: relative;
-      width: 62px;
-      height: 84px;
-      border-radius: 10px;
-      background: #141418;
-      border: 1px solid var(--border);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .digi-group {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      gap: 3px;
     }
 
-    /* Divider line in the middle */
-    .flip-card::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0;
-      top: 50%;
-      height: 1px;
-      background: rgba(0,0,0,0.7);
-      z-index: 5;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.03);
-    }
-
-    .flip-card .digit {
+    .digi-char {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 2.8rem;
+      font-size: 4rem;
       font-weight: 700;
       color: var(--text);
+      width: 52px;
+      text-align: center;
       line-height: 1;
-      transition: color 0.3s;
       position: relative;
-      z-index: 2;
+      transition: color 0.3s;
     }
 
-    .flip-card.running .digit {
+    .digi-char.changed {
+      animation: digitPop 0.35s cubic-bezier(0.2, 0, 0, 1.4);
+    }
+
+    @keyframes digitPop {
+      0% { transform: scale(1); filter: brightness(1); }
+      30% { transform: scale(1.25) translateY(-4px); filter: brightness(1.8); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .digi-colon {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      width: 24px;
+      text-align: center;
+      line-height: 1;
+      animation: colonBlink 1s step-end infinite;
+    }
+
+    .digital-clock.running .digi-char {
       color: var(--red);
-      text-shadow: var(--red-glow);
+      text-shadow: 0 0 20px rgba(255,23,68,0.6), 0 0 50px rgba(255,23,68,0.3), 0 0 100px rgba(255,23,68,0.1);
     }
 
-    /* Flip animation: brief scale pop */
-    .flip-card.flipping .digit {
-      animation: digitFlip 0.3s ease-out;
+    .digital-clock.running .digi-char.changed {
+      animation: digitPopNeon 0.35s cubic-bezier(0.2, 0, 0, 1.4);
     }
 
-    @keyframes digitFlip {
-      0% { transform: scaleY(1); }
-      30% { transform: scaleY(0.0); }
-      31% { transform: scaleY(0.0); }
-      100% { transform: scaleY(1); }
+    @keyframes digitPopNeon {
+      0% { transform: scale(1); text-shadow: 0 0 20px rgba(255,23,68,0.6), 0 0 50px rgba(255,23,68,0.3); }
+      30% { transform: scale(1.25) translateY(-4px); text-shadow: 0 0 40px rgba(255,23,68,0.9), 0 0 80px rgba(255,23,68,0.5), 0 0 140px rgba(255,23,68,0.2); }
+      100% { transform: scale(1); text-shadow: 0 0 20px rgba(255,23,68,0.6), 0 0 50px rgba(255,23,68,0.3); }
     }
 
-    /* Top/bottom shading */
-    .flip-card .shade-top,
-    .flip-card .shade-bottom {
+    .digital-clock.running .digi-colon {
+      color: var(--red);
+      text-shadow: 0 0 15px rgba(255,23,68,0.5);
+    }
+
+    /* Glow reflection under clock */
+    .digital-clock.running::after {
+      content: '';
       position: absolute;
-      left: 0; right: 0;
-      height: 50%;
-      pointer-events: none;
-      z-index: 3;
+      bottom: -16px;
+      left: 15%; right: 15%;
+      height: 24px;
+      background: radial-gradient(ellipse, rgba(255,23,68,0.25), transparent);
+      filter: blur(12px);
+      animation: glowPulse 2s ease-in-out infinite;
     }
 
-    .flip-card .shade-top {
-      top: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-      border-radius: 10px 10px 0 0;
+    /* Subtle underline bar */
+    .clock-bar {
+      width: 200px;
+      height: 2px;
+      margin: 0.8rem auto 0;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .flip-card .shade-bottom {
-      bottom: 0;
-      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15));
-      border-radius: 0 0 10px 10px;
+    .clock-bar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -40%;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      opacity: 0;
+    }
+
+    .clock-bar.running::after {
+      opacity: 1;
+      animation: barSweep 2s ease-in-out infinite;
+    }
+
+    @keyframes barSweep {
+      0% { left: -40%; }
+      100% { left: 100%; }
     }
 
     .flip-separator {
@@ -812,9 +834,8 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
-      .flip-card { width: 46px; height: 64px; }
-      .flip-card .digit { font-size: 2rem; }
-      .flip-separator { font-size: 1.8rem; }
+      .digi-char { font-size: 2.8rem; width: 38px; }
+      .digi-colon { font-size: 2.4rem; width: 16px; }
       .stats-row { grid-template-columns: 1fr 1fr; }
       .header { flex-direction: column; gap: 1rem; align-items: flex-start; }
       .week-nav span { font-size: 0.8rem; min-width: 150px; }
@@ -891,23 +912,24 @@
       <button class="timer-btn" id="timer-toggle" onclick="toggleTimer()">▶</button>
     </div>
 
-    <!-- Flip Clock -->
-    <div class="flip-clock" id="flip-clock">
-      <div class="flip-group">
-        <div class="flip-card" id="flip-h0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
-        <div class="flip-card" id="flip-h1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+    <!-- Digital Clock -->
+    <div class="digital-clock" id="digi-clock">
+      <div class="digi-group">
+        <span class="digi-char" id="d-h0">0</span>
+        <span class="digi-char" id="d-h1">0</span>
       </div>
-      <span class="flip-separator" id="sep1">:</span>
-      <div class="flip-group">
-        <div class="flip-card" id="flip-m0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
-        <div class="flip-card" id="flip-m1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+      <span class="digi-colon">:</span>
+      <div class="digi-group">
+        <span class="digi-char" id="d-m0">0</span>
+        <span class="digi-char" id="d-m1">0</span>
       </div>
-      <span class="flip-separator" id="sep2">:</span>
-      <div class="flip-group">
-        <div class="flip-card" id="flip-s0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
-        <div class="flip-card" id="flip-s1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+      <span class="digi-colon">:</span>
+      <div class="digi-group">
+        <span class="digi-char" id="d-s0">0</span>
+        <span class="digi-char" id="d-s1">0</span>
       </div>
     </div>
+    <div class="clock-bar" id="clock-bar"></div>
 
     <div class="manual-entry">
       <select id="manual-project" style="padding:9px 13px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-family:'Inter',sans-serif;outline:none"></select>
@@ -1143,55 +1165,41 @@
   }
 
   // ---- FLIP CLOCK ----
-  function flipCard(id, newVal) {
-    const card = document.getElementById(id);
-    const key = id.replace('flip-', '');
+  function setDigit(id, newVal) {
+    const el = document.getElementById(id);
+    const key = id.replace('d-', '');
     if (lastFlipValues[key] === newVal) return;
     lastFlipValues[key] = newVal;
-
-    const digit = card.querySelector('.digit');
-
-    // Trigger flip animation
-    card.classList.remove('flipping');
-    void card.offsetWidth;
-    card.classList.add('flipping');
-
-    // Update digit at the midpoint of animation (when scaleY=0, digit invisible)
-    setTimeout(() => {
-      digit.textContent = newVal;
-    }, 90);
-
-    setTimeout(() => {
-      card.classList.remove('flipping');
-    }, 300);
+    el.textContent = newVal;
+    el.classList.remove('changed');
+    void el.offsetWidth;
+    el.classList.add('changed');
   }
 
-  function setFlipRunning(running) {
-    document.querySelectorAll('.flip-card').forEach(c => c.classList.toggle('running', running));
-    document.querySelectorAll('.flip-separator').forEach(s => s.classList.toggle('running', running));
-    document.getElementById('flip-clock').classList.toggle('running', running);
+  function setClockRunning(running) {
+    document.getElementById('digi-clock').classList.toggle('running', running);
+    document.getElementById('clock-bar').classList.toggle('running', running);
   }
 
-  function updateFlipClock(h, m, s) {
+  function updateDigiClock(h, m, s) {
     const hStr = String(h).padStart(2, '0');
     const mStr = String(m).padStart(2, '0');
     const sStr = String(s).padStart(2, '0');
-    flipCard('flip-h0', hStr[0]);
-    flipCard('flip-h1', hStr[1]);
-    flipCard('flip-m0', mStr[0]);
-    flipCard('flip-m1', mStr[1]);
-    flipCard('flip-s0', sStr[0]);
-    flipCard('flip-s1', sStr[1]);
+    setDigit('d-h0', hStr[0]);
+    setDigit('d-h1', hStr[1]);
+    setDigit('d-m0', mStr[0]);
+    setDigit('d-m1', mStr[1]);
+    setDigit('d-s0', sStr[0]);
+    setDigit('d-s1', sStr[1]);
   }
 
-  function resetFlipClock() {
-    ['flip-h0','flip-h1','flip-m0','flip-m1','flip-s0','flip-s1'].forEach(id => {
-      const card = document.getElementById(id);
-      card.querySelector('.digit').textContent = '0';
-      card.classList.remove('flipping');
+  function resetClock() {
+    ['d-h0','d-h1','d-m0','d-m1','d-s0','d-s1'].forEach(id => {
+      document.getElementById(id).textContent = '0';
+      document.getElementById(id).classList.remove('changed');
     });
     lastFlipValues = { h0:'0', h1:'0', m0:'0', m1:'0', s0:'0', s1:'0' };
-    setFlipRunning(false);
+    setClockRunning(false);
   }
 
   // ---- TIMER ----
@@ -1213,7 +1221,7 @@
     timerRunning = true;
     document.getElementById('timer-toggle').innerHTML = '⏹';
     document.getElementById('timer-toggle').classList.add('active');
-    setFlipRunning(true);
+    setClockRunning(true);
     timerInterval = setInterval(updateTimerDisplay, 1000);
     updateTimerDisplay();
   }
@@ -1223,7 +1231,7 @@
     const h = Math.floor(elapsed / 3600);
     const m = Math.floor((elapsed % 3600) / 60);
     const s = elapsed % 60;
-    updateFlipClock(h, m, s);
+    updateDigiClock(h, m, s);
   }
 
   function stopTimer() {
@@ -1252,7 +1260,7 @@
     localStorage.removeItem('jp_timer');
     document.getElementById('timer-toggle').innerHTML = '▶';
     document.getElementById('timer-toggle').classList.remove('active');
-    resetFlipClock();
+    resetClock();
     renderAll();
   }
 
