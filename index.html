@@ -434,6 +434,7 @@
       border-bottom: 1px solid rgba(0,0,0,0.6);
       transform-origin: bottom center;
       transform: rotateX(0deg);
+      z-index: 4;
     }
 
     .flip-card .flip-top span {
@@ -450,6 +451,7 @@
       background: linear-gradient(180deg, #0f0f14, #0c0c10);
       transform-origin: top center;
       transform: rotateX(90deg);
+      z-index: 3;
     }
 
     .flip-card .flip-bottom span {
@@ -468,21 +470,21 @@
     }
 
     .flip-card.flipping .flip-top {
-      animation: flipDown 0.4s ease-in forwards;
+      animation: flipDown 0.25s ease-in forwards;
     }
 
     .flip-card.flipping .flip-bottom {
-      animation: flipUp 0.4s 0.2s ease-out forwards;
+      animation: flipUp 0.25s 0.2s ease-out forwards;
     }
 
     @keyframes flipDown {
-      from { transform: rotateX(0deg); }
-      to { transform: rotateX(-90deg); }
+      0% { transform: rotateX(0deg); }
+      100% { transform: rotateX(-90deg); }
     }
 
     @keyframes flipUp {
-      from { transform: rotateX(90deg); }
-      to { transform: rotateX(0deg); }
+      0% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
     }
 
     .flip-separator {
@@ -1230,20 +1232,25 @@
     const oldVal = lastFlipValues[key];
     lastFlipValues[key] = newVal;
 
-    // Set the new values on base layers
+    // Top half shows OLD value (visible before flip)
+    card.querySelector('.top span').textContent = oldVal;
+    // Bottom half shows NEW value (revealed after flip)
     card.querySelector('.bottom span').textContent = newVal;
+    // Flip-top peels away showing OLD value
     card.querySelector('.flip-top span').textContent = oldVal;
+    // Flip-bottom lands showing NEW value
     card.querySelector('.flip-bottom span').textContent = newVal;
 
-    // Trigger animation
+    // Reset and trigger animation
     card.classList.remove('flipping');
-    void card.offsetWidth; // reflow
+    void card.offsetWidth;
     card.classList.add('flipping');
 
     setTimeout(() => {
+      // After animation: update top to show NEW value (static state)
       card.querySelector('.top span').textContent = newVal;
       card.classList.remove('flipping');
-    }, 600);
+    }, 500);
   }
 
   function setFlipRunning(running) {
