@@ -353,138 +353,88 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       margin: 1.5rem 0;
-      perspective: 400px;
     }
 
     .flip-group {
       display: flex;
-      gap: 4px;
+      gap: 5px;
     }
 
     .flip-card {
       position: relative;
-      width: 60px;
-      height: 80px;
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--bg3);
+      width: 62px;
+      height: 84px;
+      border-radius: 10px;
+      background: #141418;
       border: 1px solid var(--border);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-
-    .flip-card .top,
-    .flip-card .bottom {
-      position: absolute;
-      left: 0; right: 0;
-      height: 50%;
-      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .flip-card .top {
-      top: 0;
-      background: linear-gradient(180deg, #1a1a22, #141418);
-      border-bottom: 1px solid rgba(0,0,0,0.6);
+    /* Divider line in the middle */
+    .flip-card::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: 50%;
+      height: 1px;
+      background: rgba(0,0,0,0.7);
+      z-index: 5;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.03);
     }
 
-    .flip-card .bottom {
-      bottom: 0;
-      background: linear-gradient(180deg, #0f0f14, #0c0c10);
-    }
-
-    .flip-card .top span,
-    .flip-card .bottom span {
+    .flip-card .digit {
       font-family: 'JetBrains Mono', monospace;
       font-size: 2.8rem;
       font-weight: 700;
       color: var(--text);
-      line-height: 80px;
+      line-height: 1;
+      transition: color 0.3s;
+      position: relative;
+      z-index: 2;
     }
 
-    .flip-card .top span { transform: translateY(25%); }
-    .flip-card .bottom span { transform: translateY(-25%); }
-
-    .flip-card.running .top span,
-    .flip-card.running .bottom span {
+    .flip-card.running .digit {
       color: var(--red);
       text-shadow: var(--red-glow);
     }
 
-    /* Flip animation overlay */
-    .flip-card .flip-top,
-    .flip-card .flip-bottom {
+    /* Flip animation: brief scale pop */
+    .flip-card.flipping .digit {
+      animation: digitFlip 0.3s ease-out;
+    }
+
+    @keyframes digitFlip {
+      0% { transform: scaleY(1); }
+      30% { transform: scaleY(0.0); }
+      31% { transform: scaleY(0.0); }
+      100% { transform: scaleY(1); }
+    }
+
+    /* Top/bottom shading */
+    .flip-card .shade-top,
+    .flip-card .shade-bottom {
       position: absolute;
       left: 0; right: 0;
       height: 50%;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backface-visibility: hidden;
+      pointer-events: none;
       z-index: 3;
     }
 
-    .flip-card .flip-top {
+    .flip-card .shade-top {
       top: 0;
-      background: linear-gradient(180deg, #1a1a22, #141418);
-      border-bottom: 1px solid rgba(0,0,0,0.6);
-      transform-origin: bottom center;
-      transform: rotateX(0deg);
-      z-index: 4;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+      border-radius: 10px 10px 0 0;
     }
 
-    .flip-card .flip-top span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 80px;
-      transform: translateY(25%);
-    }
-
-    .flip-card .flip-bottom {
+    .flip-card .shade-bottom {
       bottom: 0;
-      background: linear-gradient(180deg, #0f0f14, #0c0c10);
-      transform-origin: top center;
-      transform: rotateX(90deg);
-      z-index: 3;
-    }
-
-    .flip-card .flip-bottom span {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 80px;
-      transform: translateY(-25%);
-    }
-
-    .flip-card.running .flip-top span,
-    .flip-card.running .flip-bottom span {
-      color: var(--red);
-      text-shadow: var(--red-glow);
-    }
-
-    .flip-card.flipping .flip-top {
-      animation: flipDown 0.25s ease-in forwards;
-    }
-
-    .flip-card.flipping .flip-bottom {
-      animation: flipUp 0.25s 0.2s ease-out forwards;
-    }
-
-    @keyframes flipDown {
-      0% { transform: rotateX(0deg); }
-      100% { transform: rotateX(-90deg); }
-    }
-
-    @keyframes flipUp {
-      0% { transform: rotateX(90deg); }
-      100% { transform: rotateX(0deg); }
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15));
+      border-radius: 0 0 10px 10px;
     }
 
     .flip-separator {
@@ -862,9 +812,8 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 600px) {
-      .flip-card { width: 44px; height: 60px; }
-      .flip-card .top span, .flip-card .bottom span,
-      .flip-card .flip-top span, .flip-card .flip-bottom span { font-size: 2rem; line-height: 60px; }
+      .flip-card { width: 46px; height: 64px; }
+      .flip-card .digit { font-size: 2rem; }
       .flip-separator { font-size: 1.8rem; }
       .stats-row { grid-template-columns: 1fr 1fr; }
       .header { flex-direction: column; gap: 1rem; align-items: flex-start; }
@@ -945,48 +894,18 @@
     <!-- Flip Clock -->
     <div class="flip-clock" id="flip-clock">
       <div class="flip-group">
-        <div class="flip-card" id="flip-h0">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
-        <div class="flip-card" id="flip-h1">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
+        <div class="flip-card" id="flip-h0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+        <div class="flip-card" id="flip-h1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
       </div>
       <span class="flip-separator" id="sep1">:</span>
       <div class="flip-group">
-        <div class="flip-card" id="flip-m0">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
-        <div class="flip-card" id="flip-m1">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
+        <div class="flip-card" id="flip-m0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+        <div class="flip-card" id="flip-m1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
       </div>
       <span class="flip-separator" id="sep2">:</span>
       <div class="flip-group">
-        <div class="flip-card" id="flip-s0">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
-        <div class="flip-card" id="flip-s1">
-          <div class="top"><span>0</span></div>
-          <div class="bottom"><span>0</span></div>
-          <div class="flip-top"><span>0</span></div>
-          <div class="flip-bottom"><span>0</span></div>
-        </div>
+        <div class="flip-card" id="flip-s0"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
+        <div class="flip-card" id="flip-s1"><div class="shade-top"></div><div class="shade-bottom"></div><span class="digit">0</span></div>
       </div>
     </div>
 
@@ -1228,39 +1147,29 @@
     const card = document.getElementById(id);
     const key = id.replace('flip-', '');
     if (lastFlipValues[key] === newVal) return;
-
-    const oldVal = lastFlipValues[key];
     lastFlipValues[key] = newVal;
 
-    // Top half shows OLD value (visible before flip)
-    card.querySelector('.top span').textContent = oldVal;
-    // Bottom half shows NEW value (revealed after flip)
-    card.querySelector('.bottom span').textContent = newVal;
-    // Flip-top peels away showing OLD value
-    card.querySelector('.flip-top span').textContent = oldVal;
-    // Flip-bottom lands showing NEW value
-    card.querySelector('.flip-bottom span').textContent = newVal;
+    const digit = card.querySelector('.digit');
 
-    // Reset and trigger animation
+    // Trigger flip animation
     card.classList.remove('flipping');
     void card.offsetWidth;
     card.classList.add('flipping');
 
+    // Update digit at the midpoint of animation (when scaleY=0, digit invisible)
     setTimeout(() => {
-      // After animation: update top to show NEW value (static state)
-      card.querySelector('.top span').textContent = newVal;
+      digit.textContent = newVal;
+    }, 90);
+
+    setTimeout(() => {
       card.classList.remove('flipping');
-    }, 500);
+    }, 300);
   }
 
   function setFlipRunning(running) {
-    const cards = document.querySelectorAll('.flip-card');
-    const seps = document.querySelectorAll('.flip-separator');
-    const clock = document.getElementById('flip-clock');
-    cards.forEach(c => running ? c.classList.add('running') : c.classList.remove('running'));
-    seps.forEach(s => running ? s.classList.add('running') : s.classList.remove('running'));
-    if (running) clock.classList.add('running');
-    else clock.classList.remove('running');
+    document.querySelectorAll('.flip-card').forEach(c => c.classList.toggle('running', running));
+    document.querySelectorAll('.flip-separator').forEach(s => s.classList.toggle('running', running));
+    document.getElementById('flip-clock').classList.toggle('running', running);
   }
 
   function updateFlipClock(h, m, s) {
@@ -1278,7 +1187,7 @@
   function resetFlipClock() {
     ['flip-h0','flip-h1','flip-m0','flip-m1','flip-s0','flip-s1'].forEach(id => {
       const card = document.getElementById(id);
-      card.querySelectorAll('span').forEach(s => s.textContent = '0');
+      card.querySelector('.digit').textContent = '0';
       card.classList.remove('flipping');
     });
     lastFlipValues = { h0:'0', h1:'0', m0:'0', m1:'0', s0:'0', s1:'0' };
